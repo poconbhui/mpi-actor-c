@@ -3,12 +3,13 @@
 #include <mpi.h>
 
 
-// Handle for the actor_keyval attributes
+/* Handle for the actor_keyval attributes */
 int actor_keyval;
 
 
-// Initialise the attributes for the actor_keyval on the input communicator.
-// This is called in MPI_Actor_create(...)
+/* Initialise the attributes for the actor_keyval on the */
+/* input communicator.                                   */
+/* This is called in MPI_Actor_create(...) */
 int actor_keyval_init(MPI_Comm comm_actor) {
     printf("Initialising actor_keyval attrs\n");
 
@@ -19,12 +20,12 @@ int actor_keyval_init(MPI_Comm comm_actor) {
         attrs[i] = i;
     }
 
-    // Return error value from setting
+    /* Return error value from setting */
     return MPI_Comm_set_attr(comm_actor, actor_keyval, attrs);
 }
 
 
-// Destroy the actor_keyval attributes
+/* Destroy the actor_keyval attributes */
 int actor_keyval_delete(
     MPI_Comm comm_actor, int actor_keyval,
     void* attrs, void* extra_state
@@ -37,8 +38,8 @@ int actor_keyval_delete(
 }
 
 
-// Initialise the MPI_Actor library.
-// Expect to be called at every entry and ignored all but the first time.
+/* Initialise the MPI_Actor library. */
+/* Expect to be called at every entry and ignored all but the first time. */
 int MPI_Actor_init() {
     static int initialised = MPI_ERR_UNKNOWN;
 
@@ -57,9 +58,9 @@ int MPI_Actor_init() {
 }
 
 
-// Create an actor communicator
+/* Create an actor communicator */
 int MPI_Actor_create(MPI_Comm comm_old, MPI_Comm *comm_actor) {
-    // Run MPI_Actor_init at all possible entry points to the library
+    /* Run MPI_Actor_init at all possible entry points to the library */
     MPI_Actor_init();
 
     MPI_Comm_dup(comm_old, comm_actor);
@@ -67,12 +68,12 @@ int MPI_Actor_create(MPI_Comm comm_old, MPI_Comm *comm_actor) {
 }
 
 
-// Return whether the input communicator is an actor communicator
+/* Return whether the input communicator is an actor communicator */
 int is_actor_comm(MPI_Comm comm) {
     void* v;
     int flag;
 
-    // Run MPI_Actor_init at all possible entry points to the library
+    /* Run MPI_Actor_init at all possible entry points to the library */
     MPI_Actor_init();
 
     MPI_Comm_get_attr(comm, actor_keyval, &v, &flag);
@@ -88,15 +89,15 @@ int main(int argc, char* argv[]) {
     MPI_Comm comm_actor;
 
 
-    // Is MPI_COMM_WORLD an actor comm?
-    // Expect to see a message about construction here.
+    /* Is MPI_COMM_WORLD an actor comm? */
+    /* Expect to see a message about construction here. */
     printf("CW: %d\n", is_actor_comm(MPI_COMM_WORLD));
 
-    // Is comm_actor an actor comm?
+    /* Is comm_actor an actor comm? */
     MPI_Actor_create(MPI_COMM_WORLD, &comm_actor);
     printf("CA: %d\n", is_actor_comm(comm_actor));
 
-    // Expect to see a message about destruction here.
+    /* Expect to see a message about destruction here. */
     MPI_Comm_free(&comm_actor);
 
 
