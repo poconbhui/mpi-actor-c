@@ -1,0 +1,46 @@
+Basic Requirements
+------------------
+
+- Must implement a working Actor model
+- Must load balance across multiple processes
+- User must be able to initialise model and retreive
+  information from it.
+
+
+Architectural Requirements
+--------------------------
+
+- Message passing must be cross-platform compatible.
+  ie, all messages passed using proper MPI types etc.
+
+
+Structural Requirements
+-----------------------
+
+- User interface for the framework must mimic MPI interface styles.
+  Where possible, existing MPI routine interfaces should be used.
+- Implementation of actor framework must not be visible to the user.
+
+
+Behavioural Requirements
+------------------------
+
+- Actors must be capable of being born and dying.
+- Actors must only get information about other actors by giving
+  birth to them or by receiving information in a message from
+  another actor.
+- Actor messages must be asynchronous.
+- Actors must be run only when a message arrives for them.
+
+
+Functional Requirements
+-----------------------
+
+- Users must be able to define several different types of actor.
+- Framework must be capable of supporting multiple simultaneous
+  actor networks on different communicators.
+- Duplicating an actor communicator must duplicate the actor network.
+- Lifetime of actor model/implementation/data must be tied to the
+  lifetime of the MPI communicator.
+- Actors must be capable of being reliably transported from one process
+  to another.
