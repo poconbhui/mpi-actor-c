@@ -26,11 +26,13 @@ Behavioural Requirements
 ------------------------
 
 - Actors must be capable of being born and dying.
+- Actors must be capable of giving birth to new actors.
 - Actors must only get information about other actors by giving
   birth to them or by receiving information in a message from
   another actor.
 - Actor messages must be asynchronous.
 - Actors must be run only when a message arrives for them.
+- Actors must receive at most 1 message per run.
 
 
 Functional Requirements
