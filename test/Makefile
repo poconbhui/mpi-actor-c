@@ -17,5 +17,5 @@ all: $(TESTS)
 	$(MPICC) $^ -c -o $@
 
 libtest.a: test.o
-	rm libtest.a
+	rm -f libtest.a
 	ar -cvq libtest.a test.o
