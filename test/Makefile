@@ -1,7 +1,8 @@
 MPICC=mpicc
 CFLAGS=-L. -ltest -L../src -lactor
 
-TESTS=actor_type.test
+TESTS.C=$(wildcard *.test.c)
+TESTS=$(patsubst %.test.c, %.test, $(TESTS.C))
 
 LIBTEST=libtest.a
 
@@ -14,7 +15,7 @@ all: $(TESTS)
 	$(MPICC) $^ -o $@ $(CFLAGS)
 
 %.o: %.c
-	$(MPICC) $^ -c -o $@
+	$(MPICC) -Wall $^ -c -o $@
 
 libtest.a: test.o
 	rm -f libtest.a

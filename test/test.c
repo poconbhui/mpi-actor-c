@@ -4,7 +4,6 @@
 #include <string.h>
 
 
-static test_function* test_list[255];
 static char suite_name[255];
 static char test_name[255];
 
