@@ -9,4 +9,8 @@ libactor.so = actor_type.o actor_create.o
 	$(MPICC) $(CFLAGS) $^ -fPIC -c -o $@
 
 libactor.so: $(libactor.so)
-	$(MPICC) -shared -Wl,-soname,libactor.so -o $@ $(libactor.so)
+	$(MPICC) $(CFLAGS) -shared -Wl,-soname,libactor.so -o $@ $(libactor.so)
+
+clean:
+	rm -f libactor.so
+	rm -f *.o
