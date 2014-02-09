@@ -1,0 +1,4 @@
+# Object files etc
+*.o
+*.so
+*.a
