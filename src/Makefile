@@ -3,7 +3,7 @@ CFLAGS=-Wall
 
 all: libactor.so
 
-libactor.so = actor_type.o actor_create.o
+libactor.so = type_create_actor.o actor_create.o
 
 %.o: %.c
 	$(MPICC) $(CFLAGS) $^ -fPIC -c -o $@
