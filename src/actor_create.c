@@ -3,81 +3,33 @@
 #include <stdlib.h>
 
 
-/* Key for storing actor types on a communicator */
-static int comm_actor_types_key;
+/****************************************************************************/
+/* Local functions and values                                               */
+/****************************************************************************/
+
+
+/* Key to the actor types stored on a communicator */
+static int comm_actor_types_key = MPI_KEYVAL_INVALID;
 
 
 /* Allocate a new data space and copy all the entries over */
 static int comm_actor_types_key_copy_fn(
-    MPI_Comm comm_actor,
-    int comm_actor_types_key,
-    void *extra_state,
-    void *attribute_val_in,
-    void *attribute_val_out,
-    int *flag
-) {
-    MPI_Datatype  *attribute_val_in_ptr  = attribute_val_in;
-    MPI_Datatype **attribute_val_out_ptr = attribute_val_out;
-
-    int num_entries;
-    int i;
+    MPI_Comm, int, void*, void*, void*, int*
+);
 
 
-    /* Find the number of Actor types in the input attributes */
-    /* MPI_DATATYPE_NULL used to mark end of entries */
-    num_entries = 0;
-    while(
-        attribute_val_in_ptr[num_entries] != MPI_DATATYPE_NULL
-        && num_entries++
-    );
-    num_entries++;
-
-    /* Allocate the new attribute array */
-    *attribute_val_out_ptr = malloc(sizeof(MPI_Datatype)*(num_entries));
-
-    /* Copy entries over */
-    for(i=0; i<num_entries; i++) {
-        (*attribute_val_out_ptr)[i] = attribute_val_in_ptr[i];
-    }
-
-
-    *flag=1;
-
-
-    return MPI_SUCCESS;
-}
-
-
-/* Simply free the data */
-static int comm_key_free_fn(
-    MPI_Comm comm_actor,
-    int comm_key,
-    void *attribute_val,
-    void *extra_state
-){
-    free(attribute_val);
-
-    return MPI_SUCCESS;
-}
+/* Free the attribute_val pointer */
+static int comm_key_free_fn(MPI_Comm, int, void*, void*);
 
 
 /* Initialise keyvals if not already initialised. Otherwise do nothing. */
-static int initialise_keys(void) {
-    static int initialised = MPI_ERR_UNKNOWN;
+/* NOT thread safe                                                      */
+static int initialise_keys(void);
 
-    if(initialised != MPI_SUCCESS) {
-        MPI_Comm_create_keyval(
-            comm_actor_types_key_copy_fn,
-            comm_key_free_fn,
-            &comm_actor_types_key,
-            NULL
-        );
 
-        initialised = MPI_SUCCESS;
-    }
-
-    return initialised;
-}
+/****************************************************************************/
+/* Implementations start here                                               */
+/****************************************************************************/
 
 
 int MPI_Actor_create(
@@ -125,6 +77,7 @@ int MPI_Actor_create(
     return MPI_SUCCESS;
 }
 
+/****************************************************************************/
 
 int MPI_Actor_get(
     MPI_Comm comm_actor, int nactor_types,
@@ -145,4 +98,78 @@ int MPI_Actor_get(
     }
 
     return MPI_SUCCESS;
+}
+
+/****************************************************************************/
+
+static int comm_actor_types_key_copy_fn(
+    MPI_Comm comm_actor,
+    int comm_actor_types_key,
+    void *extra_state,
+    void *attribute_val_in,
+    void *attribute_val_out,
+    int *flag
+) {
+    MPI_Datatype  *attribute_val_in_ptr  = attribute_val_in;
+    MPI_Datatype **attribute_val_out_ptr = attribute_val_out;
+
+    int num_entries;
+    int i;
+
+
+    /* Find the number of Actor types in the input attributes */
+    /* MPI_DATATYPE_NULL used to mark end of entries */
+    num_entries = 0;
+    while(
+        attribute_val_in_ptr[num_entries] != MPI_DATATYPE_NULL
+        && num_entries++
+    );
+    num_entries++;
+
+    /* Allocate the new attribute array */
+    *attribute_val_out_ptr = malloc(sizeof(MPI_Datatype)*(num_entries));
+
+    /* Copy entries over */
+    for(i=0; i<num_entries; i++) {
+        (*attribute_val_out_ptr)[i] = attribute_val_in_ptr[i];
+    }
+
+
+    *flag=1;
+
+
+    return MPI_SUCCESS;
+}
+
+/****************************************************************************/
+
+static int comm_key_free_fn(
+    MPI_Comm comm_actor,
+    int comm_key,
+    void *attribute_val,
+    void *extra_state
+){
+    free(attribute_val);
+
+    return MPI_SUCCESS;
+}
+
+/****************************************************************************/
+
+static int initialise_keys(void) {
+    /* TODO: Add mutex locks to allow for thread safety */
+    static int initialised = MPI_ERR_UNKNOWN;
+
+    if(initialised != MPI_SUCCESS) {
+        MPI_Comm_create_keyval(
+            comm_actor_types_key_copy_fn,
+            comm_key_free_fn,
+            &comm_actor_types_key,
+            NULL
+        );
+
+        initialised = MPI_SUCCESS;
+    }
+
+    return initialised;
 }
