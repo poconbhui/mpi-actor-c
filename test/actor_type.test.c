@@ -29,7 +29,7 @@ void actor_type_creation(void) {
     MPI_Datatype data_type = MPI_INT;
 
     int test_data_count = 0;
-    MPI_Datatype test_data_type = NULL;
+    MPI_Datatype test_data_type = MPI_DATATYPE_NULL;
 
     MPI_Type_create_actor(
         test_init_fn,
@@ -69,7 +69,7 @@ void actor_type_duplication(void) {
     MPI_Datatype data_type = MPI_INT;
 
     int test_data_count = 0;
-    MPI_Datatype test_data_type = NULL;
+    MPI_Datatype test_data_type = MPI_DATATYPE_NULL;
 
     MPI_Type_create_actor(
         test_init_fn,
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
 
 
-    start_suite("Actor Type Definition");
+    start_suite("MPI_Type_create_actor");
     run_test(actor_type_creation, "Actor Type Creation");
     run_test(actor_type_duplication, "Actor Type Duplication");
     end_suite();
