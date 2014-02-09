@@ -1,4 +1,4 @@
-#include "actor_type.h"
+#include "actor.h"
 
 #include <stdlib.h>
 
