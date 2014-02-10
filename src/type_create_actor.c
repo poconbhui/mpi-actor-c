@@ -8,41 +8,45 @@
 /****************************************************************************/
 
 
-/* A key to the initialisation function for an actor type */
+/* Keyval for the initialisation function for an actor type. */
 static int actor_initialise_function_key = MPI_KEYVAL_INVALID;
 
 
-/* A key to the main function for an actor type */
+/* Keyval for the main function for an actor type. */
 static int actor_main_function_key = MPI_KEYVAL_INVALID;
 
 
-/* A key to the destruction function for an actor type */
+/* Keyval for the destruction function for an actor type. */
 static int actor_destroy_function_key = MPI_KEYVAL_INVALID;
 
 
-/* A key to the number of data held by the actor */
+/* Keyval for the number of data elements held by the actor. */
 static int data_count_key = MPI_KEYVAL_INVALID;
 
-/* data_count_key copying function */
-static int data_count_key_copy_fn(
+/* Keyval copy function which allocates space to hold an int */
+/* and copies the old value across.                          */
+static int type_int_copy_fn(
     MPI_Datatype, int, void*, void*, void*, int*
 );
 
 
-/* A key to the type of data held by the actor */
+/* Keyval for the MPI_Datatype held by the actor */
 static int data_type_key = MPI_KEYVAL_INVALID;
 
-/* data_type_key copying function */
-static int data_type_key_copy_fn(MPI_Datatype, int, void*, void*, void*, int*);
+/* Keyval copy function which allocates space to hold an */
+/* MPI_Datatype and copies the old value across.         */
+static int type_mpi_datatype_copy_fn(
+    MPI_Datatype, int, void*, void*, void*, int*
+);
 
 
 /* Free the memory held in the attribute_val pointer */
-static int datatype_free_fn(MPI_Datatype, int, void*, void*);
+static int attribute_val_free_fn(MPI_Datatype, int, void*, void*);
 
 
 /* Initialise they keys in this file if not already initiialised */
 /* Not thread safe!                                              */
-static int initialise_keys(void);
+static void initialise_keys(void);
 
 
 /****************************************************************************/
@@ -58,6 +62,10 @@ int MPI_Type_create_actor(
     MPI_Datatype *actor_type
 ) {
 
+    /* Initialise keyvals if not already initialised */
+    initialise_keys();
+
+
     /* Define the type and commit early so keys can be added to it. */
     /* MPI-2 says committing twice is allowed and a null-op         */
     MPI_Type_contiguous(
@@ -65,10 +73,6 @@ int MPI_Type_create_actor(
         actor_type
     );
     MPI_Type_commit(actor_type);
-
-
-    /* Initialise keyvals if not already initialised */
-    initialise_keys();
 
 
     /* Set function keyvals */
@@ -129,7 +133,7 @@ int MPI_Actor_data_type(MPI_Datatype actor_type, MPI_Datatype *type) {
 
 /****************************************************************************/
 
-static int data_count_key_copy_fn(
+static int type_int_copy_fn(
     MPI_Datatype actor_type,
     int data_count_key,
     void *extra_state,
@@ -150,7 +154,7 @@ static int data_count_key_copy_fn(
 
 /****************************************************************************/
 
-static int data_type_key_copy_fn(
+static int type_mpi_datatype_copy_fn(
     MPI_Datatype actor_type,
     int data_count_key,
     void *extra_state,
@@ -171,7 +175,7 @@ static int data_type_key_copy_fn(
 
 /****************************************************************************/
 
-static int datatype_free_fn(
+static int attribute_val_free_fn(
     MPI_Datatype actor_type,
     int data_count_key,
     void *attribute_val,
@@ -184,48 +188,52 @@ static int datatype_free_fn(
 
 /****************************************************************************/
 
-static int initialise_keys(void) {
+static void initialise_keys(void) {
     /* TODO: Add mutex locks etc for thread safety.  */
     /* Same problem exists in MPICH2 implementation. */
 
-    static int initialised = MPI_ERR_UNKNOWN;
-
-    if(initialised != MPI_SUCCESS) {
+    if(actor_initialise_function_key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
             MPI_TYPE_DUP_FN,
             MPI_TYPE_NULL_DELETE_FN,
             &actor_initialise_function_key,
             NULL
         );
+    }
+    
+    if(actor_main_function_key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
             MPI_TYPE_DUP_FN,
             MPI_TYPE_NULL_DELETE_FN,
             &actor_main_function_key,
             NULL
         );
+    }
+
+    if(actor_destroy_function_key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
             MPI_TYPE_DUP_FN,
             MPI_TYPE_NULL_DELETE_FN,
             &actor_destroy_function_key,
             NULL
         );
+    }
 
+    if(data_count_key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
-            data_count_key_copy_fn,
-            datatype_free_fn,
+            type_int_copy_fn,
+            attribute_val_free_fn,
             &data_count_key,
             NULL
         );
+    }
 
+    if(data_type_key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
-            data_type_key_copy_fn,
-            datatype_free_fn,
+            type_mpi_datatype_copy_fn,
+            attribute_val_free_fn,
             &data_type_key,
             NULL
         );
-
-        initialised = MPI_SUCCESS;
     }
-
-    return initialised;
 }

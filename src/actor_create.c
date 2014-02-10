@@ -8,23 +8,25 @@
 /****************************************************************************/
 
 
-/* Key to the actor types stored on a communicator */
+/* Keyval for actor types stored on a communicator. */
 static int comm_actor_types_key = MPI_KEYVAL_INVALID;
 
 
-/* Allocate a new data space and copy all the entries over */
+/* Keyval copy function for the comm_actor_types_key keyval  */
+/* which allocates a new attributes_val array and copies the */
+/* old values to it.                                         */
 static int comm_actor_types_key_copy_fn(
     MPI_Comm, int, void*, void*, void*, int*
 );
 
 
-/* Free the attribute_val pointer */
-static int comm_key_free_fn(MPI_Comm, int, void*, void*);
+/* Keyval delete function which frees the attribute_val pointer */
+static int comm_attribute_val_free_fn(MPI_Comm, int, void*, void*);
 
 
 /* Initialise keyvals if not already initialised. Otherwise do nothing. */
-/* NOT thread safe                                                      */
-static int initialise_keys(void);
+/* NOT thread safe.                                                     */
+static void initialise_keys(void);
 
 
 /****************************************************************************/
@@ -143,7 +145,7 @@ static int comm_actor_types_key_copy_fn(
 
 /****************************************************************************/
 
-static int comm_key_free_fn(
+static int comm_attribute_val_free_fn(
     MPI_Comm comm_actor,
     int comm_key,
     void *attribute_val,
@@ -156,20 +158,15 @@ static int comm_key_free_fn(
 
 /****************************************************************************/
 
-static int initialise_keys(void) {
+static void initialise_keys(void) {
     /* TODO: Add mutex locks to allow for thread safety */
-    static int initialised = MPI_ERR_UNKNOWN;
 
-    if(initialised != MPI_SUCCESS) {
+    if(comm_actor_types_key == MPI_KEYVAL_INVALID) {
         MPI_Comm_create_keyval(
             comm_actor_types_key_copy_fn,
-            comm_key_free_fn,
+            comm_attribute_val_free_fn,
             &comm_actor_types_key,
             NULL
         );
-
-        initialised = MPI_SUCCESS;
     }
-
-    return initialised;
 }
