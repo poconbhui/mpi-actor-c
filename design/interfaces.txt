@@ -22,13 +22,22 @@
     - Incoming message tag
     - Stored state
 
-- MPI_Type_get_actor
+- MPI_Actor_get_datatypes
   - Return information about datatypes used for the actor datatype
   - Arguments:
     - Actor datatype
   - Returns:
     - Data element count
     - Datatype
+
+- MPI_Actor_get_data
+  - Return the initial data used for the actor
+  - Arguments:
+    - Max data elements
+    - Datatype
+    - Actor datatype
+  - Returns:
+    - Data buffer
 
 
 ##############################################################################
