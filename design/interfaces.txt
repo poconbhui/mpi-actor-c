@@ -1,0 +1,113 @@
+##############################################################################
+# Actor data type definition                                                 #
+##############################################################################
+
+- MPI_Type_create_actor
+  - Looks like MPI type creation routine
+  - Defines an "actor class".
+  - Arguments:
+    - Main function
+    - Data type for storage
+    - Number of data elements held
+    - Initial state of actor
+  - Returns:
+    - Actor datatype
+
+- MPI_Actor_main_function
+  - Function pointer typedef
+  - Arguments:
+    - Actor communicator
+    - Actor type
+    - Incoming message
+    - Incoming message tag
+    - Stored state
+
+- MPI_Type_get_actor
+  - Return information about datatypes used for the actor datatype
+  - Arguments:
+    - Actor datatype
+  - Returns:
+    - Data element count
+    - Datatype
+
+
+##############################################################################
+# Actor model communicator generation                                        #
+##############################################################################
+
+- MPI_Actor_create
+  - Looks like MPI communicator routine
+    eg MPI_Cart_create, MPI_Graph_create.
+  - Defines "actor model" space.
+  - Arguments:
+    - List of actors to use
+    - Size of actor list
+    - Receptionist actor to use
+    - Communicator to duplicate for use
+  - Returns:
+    - Actor communicator
+
+- MPI_Actor_get
+  - Looks like MPI_Cart_get
+  - Returns information about the actor model space.
+  - Arguments:
+    - Actor model communicator
+    - Max number of actor types
+  - Returns:
+    - List of actor types
+
+- MPI_Actor_get_num
+  - Looks like _get_ routines
+  - Returns number of actor types defined on the communicator
+  - Arguments:
+    - Actor model communicator
+  - Returns:
+    - Number of actor types
+
+- MPI_Actor_test
+  - Looks like MPI_Topo_test
+  - Returns whether or not "actor space"
+  - Arguments:
+    - Communicator
+  - Returns:
+    - MPI_ACTOR if actor comm, else MPI_UNDEFINED
+
+
+##############################################################################
+# Actor model execution                                                      #
+##############################################################################
+
+- MPI_Actor_start
+  - Looks like some communication _start routines
+  - Runs the actor model until receptionist dies
+  - When receptionist dies, everything held in suspended state.
+  - Arguments:
+    - Actor communicator
+    - Buffer with receptionist state information
+  - Returns:
+    - Buffer with final receptionist state information
+
+
+##############################################################################
+# Actor instance functions                                                   #
+##############################################################################
+
+- MPI_Actor_speak
+  - Actor specific data sending routine
+  - Arguments:
+    - Data buffer
+    - Buffer count
+    - Data type
+    - Actor ID
+    - Tag
+    - Actor communicator
+
+- MPI_Actor_birth
+  - Actor specific birthing routine
+  - Generate an actor on an unspecified process and get some
+    identifier for it
+  - Arguments:
+    - Actor type
+    - Actor communicator
+  - Return:
+    - Actor ID
