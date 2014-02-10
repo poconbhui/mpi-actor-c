@@ -1,6 +1,7 @@
 #include "actor.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 
 /****************************************************************************/
@@ -8,40 +9,26 @@
 /****************************************************************************/
 
 
-/* Keyval for the initialisation function for an actor type. */
-static int actor_initialise_function_key = MPI_KEYVAL_INVALID;
-
-
 /* Keyval for the main function for an actor type. */
-static int actor_main_function_key = MPI_KEYVAL_INVALID;
+static int actor_type_struct_key = MPI_KEYVAL_INVALID;
+
+typedef struct {
+    MPI_Actor_main_function *main;
+    int count;
+    MPI_Datatype type;
+    void *initial_data;
+} actor_type_struct;
 
 
-/* Keyval for the destruction function for an actor type. */
-static int actor_destroy_function_key = MPI_KEYVAL_INVALID;
-
-
-/* Keyval for the number of data elements held by the actor. */
-static int data_count_key = MPI_KEYVAL_INVALID;
-
-/* Keyval copy function which allocates space to hold an int */
-/* and copies the old value across.                          */
-static int type_int_copy_fn(
-    MPI_Datatype, int, void*, void*, void*, int*
+static void alloc_actor_type_struct(
+    MPI_Actor_main_function, int, MPI_Datatype, void*, actor_type_struct**
 );
 
-
-/* Keyval for the MPI_Datatype held by the actor */
-static int data_type_key = MPI_KEYVAL_INVALID;
-
-/* Keyval copy function which allocates space to hold an */
-/* MPI_Datatype and copies the old value across.         */
-static int type_mpi_datatype_copy_fn(
-    MPI_Datatype, int, void*, void*, void*, int*
+static int copy_actor_type_struct(
+    MPI_Comm, int, void*, void*, void*, int*
 );
 
-
-/* Free the memory held in the attribute_val pointer */
-static int attribute_val_free_fn(MPI_Datatype, int, void*, void*);
+static int free_actor_type_struct(MPI_Datatype, int, void*, void*);
 
 
 /* Initialise they keys in this file if not already initiialised */
@@ -55,12 +42,12 @@ static void initialise_keys(void);
 
 
 int MPI_Type_create_actor(
-    MPI_Actor_initialise_function *actor_initialise_function,
     MPI_Actor_main_function *actor_main_function,
-    MPI_Actor_destroy_function *actor_destroy_function,
-    int count, MPI_Datatype type,
+    int count, MPI_Datatype type, void *initial_data,
     MPI_Datatype *actor_type
 ) {
+    actor_type_struct *actor_data;
+
 
     /* Initialise keyvals if not already initialised */
     initialise_keys();
@@ -75,30 +62,15 @@ int MPI_Type_create_actor(
     MPI_Type_commit(actor_type);
 
 
-    /* Set function keyvals */
-    MPI_Type_set_attr(
-        *actor_type, actor_initialise_function_key, actor_initialise_function
-    );
-    MPI_Type_set_attr(
-        *actor_type, actor_main_function_key, actor_main_function
-    );
-    MPI_Type_set_attr(
-        *actor_type, actor_destroy_function_key, actor_destroy_function
+    /* Initialise actor_type_struct and set to keyval */
+    alloc_actor_type_struct(
+        actor_main_function,
+        count, type, initial_data,
+        &actor_data
     );
 
-
-    /* Allocate data for data_count keyval and set it */
-    int *data_count_key_data = malloc(sizeof(int));
-    *data_count_key_data = count;
     MPI_Type_set_attr(
-        *actor_type, data_count_key, data_count_key_data
-    );
-
-    /* Allocate data for data_type keyval and set it */
-    MPI_Datatype *data_type_key_data = malloc(sizeof(int));
-    *data_type_key_data = type;
-    MPI_Type_set_attr(
-        *actor_type, data_type_key, data_type_key_data
+        *actor_type, actor_type_struct_key, actor_data
     );
 
 
@@ -107,33 +79,88 @@ int MPI_Type_create_actor(
 
 /****************************************************************************/
 
-int MPI_Actor_data_count(MPI_Datatype actor_type, int *count) {
-    int *data_count_ptr = NULL;
+int MPI_Actor_get_datatypes(
+    MPI_Datatype actor_type, int *count, MPI_Datatype *type
+) {
+    actor_type_struct* actor_data;
     int flag;
+    int err;
 
-    MPI_Type_get_attr(actor_type, data_count_key, &data_count_ptr, &flag);
 
-    *count = *data_count_ptr;
+    err = MPI_Type_get_attr(
+        actor_type, actor_type_struct_key, &actor_data, &flag
+    );
+
+    if(flag != 1 || err != MPI_SUCCESS) {
+        /* actor_type_struct_key not set on this type */
+        return MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_TYPE);
+    }
+
+
+    *count = actor_data->count;
+    *type  = actor_data->type;
+
 
     return MPI_SUCCESS;
 }
 
 /****************************************************************************/
 
-int MPI_Actor_data_type(MPI_Datatype actor_type, MPI_Datatype *type) {
-    MPI_Datatype *data_type_ptr = NULL;
+int MPI_Actor_get_data(
+    MPI_Datatype actor_type, int count, MPI_Datatype type, void* data
+) {
+    actor_type_struct *actor_data;
     int flag;
+    int err;
 
-    MPI_Type_get_attr(actor_type, data_type_key, &data_type_ptr, &flag);
 
-    *type = *data_type_ptr;
+    err = MPI_Type_get_attr(
+        actor_type, actor_type_struct_key, &actor_data, &flag
+    );
+
+    if(flag != 1 || err != MPI_SUCCESS) {
+        return flag;
+    }
+
+
+    /* Get the lesser of the input sizes and the actual size */
+    int type_in_size;
+    int type_actual_size;
+    MPI_Type_size(type, &type_in_size);
+    MPI_Type_size(actor_data->type, &type_actual_size);
+
+    size_t size_in = type_in_size*count;
+    size_t size_actual = type_actual_size*(actor_data->count);
+
+    if(size_in > size_actual) size_in = size_actual;
+    memcpy(data, actor_data->initial_data, size_in);
+
 
     return MPI_SUCCESS;
 }
 
 /****************************************************************************/
 
-static int type_int_copy_fn(
+static void alloc_actor_type_struct(
+    MPI_Actor_main_function *main,
+    int count, MPI_Datatype type, void *initial_data,
+    actor_type_struct** actor_data
+) {
+    *actor_data = malloc(sizeof(actor_type_struct));
+
+    (**actor_data).main  = main;
+    (**actor_data).count = count;
+    (**actor_data).type  = type;
+
+    int type_size;
+    MPI_Type_size(type, &type_size);
+    (**actor_data).initial_data = malloc(type_size*count);
+    memcpy((**actor_data).initial_data, initial_data, type_size*count);
+}
+
+/****************************************************************************/
+
+static int copy_actor_type_struct(
     MPI_Datatype actor_type,
     int data_count_key,
     void *extra_state,
@@ -141,11 +168,16 @@ static int type_int_copy_fn(
     void *attribute_val_out,
     int *flag
 ) {
-    int *attribute_val_in_ptr = attribute_val_in;
-    int **attribute_val_out_ptr = attribute_val_out;
+    actor_type_struct *old_actor  = attribute_val_in;
+    actor_type_struct **new_actor = attribute_val_out;
 
-    *attribute_val_out_ptr = malloc(sizeof(int));
-    **attribute_val_out_ptr = *attribute_val_in_ptr;
+    alloc_actor_type_struct(
+        old_actor->main,
+        old_actor->count,
+        old_actor->type,
+        old_actor->initial_data,
+        new_actor
+    );
 
     *flag=1;
 
@@ -154,34 +186,16 @@ static int type_int_copy_fn(
 
 /****************************************************************************/
 
-static int type_mpi_datatype_copy_fn(
-    MPI_Datatype actor_type,
-    int data_count_key,
-    void *extra_state,
-    void *attribute_val_in,
-    void *attribute_val_out,
-    int *flag
-) {
-    int *attribute_val_in_ptr = attribute_val_in;
-    int **attribute_val_out_ptr = attribute_val_out;
-
-    *attribute_val_out_ptr = malloc(sizeof(MPI_Datatype));
-    **attribute_val_out_ptr = *attribute_val_in_ptr;
-
-    *flag=1;
-
-    return MPI_SUCCESS;
-}
-
-/****************************************************************************/
-
-static int attribute_val_free_fn(
+static int free_actor_type_struct(
     MPI_Datatype actor_type,
     int data_count_key,
     void *attribute_val,
     void *extra_state
 ){
-    free(attribute_val);
+    actor_type_struct *old_actor = attribute_val;
+
+    free(old_actor->initial_data);
+    free(old_actor);
 
     return MPI_SUCCESS;
 }
@@ -191,48 +205,12 @@ static int attribute_val_free_fn(
 static void initialise_keys(void) {
     /* TODO: Add mutex locks etc for thread safety.  */
     /* Same problem exists in MPICH2 implementation. */
-
-    if(actor_initialise_function_key == MPI_KEYVAL_INVALID) {
-        MPI_Type_create_keyval(
-            MPI_TYPE_DUP_FN,
-            MPI_TYPE_NULL_DELETE_FN,
-            &actor_initialise_function_key,
-            NULL
-        );
-    }
     
-    if(actor_main_function_key == MPI_KEYVAL_INVALID) {
+    if(actor_type_struct_key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
-            MPI_TYPE_DUP_FN,
-            MPI_TYPE_NULL_DELETE_FN,
-            &actor_main_function_key,
-            NULL
-        );
-    }
-
-    if(actor_destroy_function_key == MPI_KEYVAL_INVALID) {
-        MPI_Type_create_keyval(
-            MPI_TYPE_DUP_FN,
-            MPI_TYPE_NULL_DELETE_FN,
-            &actor_destroy_function_key,
-            NULL
-        );
-    }
-
-    if(data_count_key == MPI_KEYVAL_INVALID) {
-        MPI_Type_create_keyval(
-            type_int_copy_fn,
-            attribute_val_free_fn,
-            &data_count_key,
-            NULL
-        );
-    }
-
-    if(data_type_key == MPI_KEYVAL_INVALID) {
-        MPI_Type_create_keyval(
-            type_mpi_datatype_copy_fn,
-            attribute_val_free_fn,
-            &data_type_key,
+            copy_actor_type_struct,
+            free_actor_type_struct,
+            &actor_type_struct_key,
             NULL
         );
     }

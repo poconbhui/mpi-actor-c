@@ -5,27 +5,25 @@
 #include <stdlib.h>
 
 
-void test_init_fn(MPI_Comm comm_actor, MPI_Datatype actor_type, void* data) {
-}
-
-int test_main_fn(MPI_Comm comm_actor, MPI_Datatype actor_type, void* data) {
-    return MPI_ACTOR_ALIVE;
-}
-
-void test_destroy_fn(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, void* data
+int test_main_fn(
+    MPI_Comm comm_actor, MPI_Datatype actor_type,
+    void *message, int tag,
+    void* state
 ) {
+    return MPI_ACTOR_ALIVE;
 }
 
 
 /* Generate the test_actor_type */
 MPI_Datatype gen_test_actor_type() {
-    static MPI_Datatype test_actor_type = NULL;
+    static MPI_Datatype test_actor_type = MPI_DATATYPE_NULL;
 
-    if(test_actor_type == NULL) {
+    int data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    if(test_actor_type == MPI_DATATYPE_NULL) {
         MPI_Type_create_actor(
-            test_init_fn, test_main_fn, test_destroy_fn,
-            10, MPI_INT,
+            test_main_fn,
+            10, MPI_INT, data,
             &test_actor_type
         );
     }

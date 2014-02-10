@@ -15,21 +15,14 @@
 
 /* Actor function prototypes */
 
-/* These are used to define the function prototypes accepted by    */
+/* These are used to define the function prototype accepted by     */
 /* the MPI_Type_create_actor routine for generating an Actor type. */
-/* They correspond roughly to OO type class initialisation and     */
-/* destruction routines with a member function called "main" which */
-/* will be run when an actor receives a message.                   */
-typedef void MPI_Actor_initialise_function(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, void* state
-);
-
+/* The MPI_Actor_main_function will be run any time a message      */
+/* arrives for an actor.                                           */
 typedef int MPI_Actor_main_function(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, void* state
-);
-
-typedef void MPI_Actor_destroy_function(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, void* state
+    MPI_Comm comm_actor, MPI_Datatype actor_type,
+    void* message, int tag,
+    void* state
 );
 
 
@@ -40,20 +33,26 @@ typedef void MPI_Actor_destroy_function(
 /* with an initialisation routine, a "main" routine which will be   */
 /* run any time a message arrives for it, and a destruction routine */
 /* which will be run when the actor dies.                           */
+/* When a new instance of an actor of type actor_type is created,   */
+/* it will be passed a copy of the initial_data array.              */
 int MPI_Type_create_actor(
-    MPI_Actor_initialise_function *actor_initialise_function,
     MPI_Actor_main_function *actor_main_function,
-    MPI_Actor_destroy_function *actor_destroy_function,
-    int count, MPI_Datatype type,
+    int count, MPI_Datatype type, void* initial_data,
     MPI_Datatype *actor_type
 );
 
 
-/* Return the number of data elements held by the Actor type */
-int MPI_Actor_data_count(MPI_Datatype actor_type, int *count);
+/* Return the number of data elements and type held by the Actor type */
+int MPI_Actor_get_datatypes(
+    MPI_Datatype actor_type, int *count, MPI_Datatype *type
+);
 
-/* Return the underlying data type being used by the Actor type */
-int MPI_Actor_data_type(MPI_Datatype actor_type, MPI_Datatype *type);
+/* Copy the initial data passed to an instance of an actor to initial_data */
+int MPI_Actor_get_data(
+    MPI_Datatype actor_type,
+    int count, MPI_Datatype type,
+    void *initial_data
+);
 
 
 #endif // MPI_ACTOR_TYPE_H_
