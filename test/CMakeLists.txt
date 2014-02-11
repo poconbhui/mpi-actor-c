@@ -1,10 +1,7 @@
-# Set up MPI
-#find_package(MPI REQUIRED)
-#include(CMakeForceCompiler)
-#CMAKE_FORCE_C_COMPILER(mpicc ${CMAKE_C_COMPILER_ID})
-
-
 add_library(mpitest mpitest.c)
+
+
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
 
 # Add tests
