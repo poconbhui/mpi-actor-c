@@ -11,7 +11,7 @@ static char test_name[255];
 static int total_tests_run;
 static int total_tests_passed;
 
-static int suite_exit_status_var = EXIT_SUCCESS;
+static int mpitest_exit_status_var = EXIT_SUCCESS;
 
 
 void start_suite(char *name) {
@@ -54,12 +54,14 @@ void end_suite() {
     printf("------------------\n\n");
 
 
-    suite_exit_status_var = EXIT_FAILURE;
+    if(total_tests_run != total_tests_passed) {
+        mpitest_exit_status_var = EXIT_FAILURE;
+    }
 }
 
 
-int suite_exit_status(void) {
-    return suite_exit_status_var;
+int mpitest_exit_status(void) {
+    return mpitest_exit_status_var;
 }
 
 

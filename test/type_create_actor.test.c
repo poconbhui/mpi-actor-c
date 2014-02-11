@@ -185,5 +185,5 @@ int main(int argc, char* argv[]) {
 
 
     MPI_Finalize();
-    return EXIT_SUCCESS;
+    return mpitest_exit_status();
 }
