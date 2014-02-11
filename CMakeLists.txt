@@ -10,7 +10,6 @@ include(CMakeForceCompiler)
 CMAKE_FORCE_C_COMPILER(mpicc ${CMAKE_C_COMPILER_ID})
 
 
-enable_testing()
 
 # Add make check command which outputs error messages from test
 add_custom_target( check
@@ -18,5 +17,10 @@ add_custom_target( check
         --force-new-ctest-process --output-on-failure
 )
 
+
 add_subdirectory (src)
+
+
+# Enable testing from here
+enable_testing()
 add_subdirectory (test)
