@@ -11,7 +11,7 @@
 /* values for the arguments.                                     */
 int MPI_Actor_create(
     MPI_Comm comm_old, int nactor_types,
-    MPI_Datatype *actor_types,
+    MPI_Datatype *actor_types, MPI_Datatype receptionist,
     MPI_Comm *comm_actor
 );
 
@@ -21,8 +21,8 @@ int MPI_Actor_create(
 /* This returns a list of the actor types registered to an */
 /* Actor communicator.                                     */
 int MPI_Actor_get(
-    MPI_Comm comm_actor, int nactor_types,
-    MPI_Datatype *actor_types
+    MPI_Comm comm_actor, int max_num_actor_types,
+    MPI_Datatype *actor_types, MPI_Datatype *receptionist_type
 );
 
 
