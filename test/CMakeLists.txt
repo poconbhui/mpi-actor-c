@@ -1,17 +1,24 @@
 # Set up MPI
-find_package(MPI REQUIRED)
-include(CMakeForceCompiler)
-CMAKE_FORCE_C_COMPILER(mpicc ${CMAKE_C_COMPILER_ID})
+#find_package(MPI REQUIRED)
+#include(CMakeForceCompiler)
+#CMAKE_FORCE_C_COMPILER(mpicc ${CMAKE_C_COMPILER_ID})
 
 
-add_library( mpitest
-    "${PROJECT_SOURCE_DIR}/test/mpitest.c"
-)
-
-include_directories("${PROJECT_SOURCE_DIR}/src")
-include_directories("${PROJECT_SOURCE_DIR}/test")
+add_library(mpitest mpitest.c)
 
 
-add_executable(actor_create.test actor_create.test.c)
-target_link_libraries(actor_create.test actor mpitest)
-add_test(actor_create.test actor_create.test)
+# Add tests
+#
+# Expect test files in form myfeature.test.c
+#
+FILE(GLOB TESTFILES *.test.c)
+
+foreach(TESTFILE ${TESTFILES})
+    GET_FILENAME_COMPONENT(TEST ${TESTFILE} NAME_WE)
+
+    MESSAGE("-- Adding test: ${TEST}.test")
+
+    add_executable(${TEST}.test ${TEST}.test.c)
+    target_link_libraries(${TEST}.test actor mpitest)
+    add_test(${TEST}.test ${TEST}.test)
+endforeach(TESTFILE)
