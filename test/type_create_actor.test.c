@@ -1,5 +1,5 @@
 #include "../src/actor.h"
-#include "test.h"
+#include "mpitest.h"
 
 #include <stdlib.h>
 #include <stdio.h>

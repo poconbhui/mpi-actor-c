@@ -2,3 +2,6 @@
 *.o
 *.so
 *.a
+
+# CMake build directory
+build

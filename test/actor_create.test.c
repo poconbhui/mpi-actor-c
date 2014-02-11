@@ -1,5 +1,5 @@
 #include "../src/actor.h"
-#include "test.h"
+#include "mpitest.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,7 +54,7 @@ void comm_actor_creation(void) {
     /* Check return values */
     require_true(
         "MPI_Actor create return value should be MPI_SUCCESS", MPI_COMM_WORLD,
-        err == MPI_SUCCESS
+        !err == MPI_SUCCESS
     );
 
     require_true(
@@ -219,5 +219,5 @@ int main(int argc, char* argv[]) {
     end_suite();
 
     MPI_Finalize();
-    return EXIT_SUCCESS;
+    return suite_exit_status();
 }
