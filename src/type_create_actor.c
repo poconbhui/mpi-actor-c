@@ -25,7 +25,7 @@ static void alloc_actor_type_struct(
 );
 
 static int copy_actor_type_struct(
-    MPI_Comm, int, void*, void*, void*, int*
+    MPI_Datatype, int, void*, void*, void*, int*
 );
 
 static int free_actor_type_struct(MPI_Datatype, int, void*, void*);
