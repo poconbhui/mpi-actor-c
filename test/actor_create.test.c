@@ -47,7 +47,7 @@ void comm_actor_creation(void) {
     MPI_Comm comm_actor = MPI_COMM_NULL;
 
     MPI_Datatype test_actor_type = gen_test_actor_type();
-    MPI_Datatype test_receptionist_type = test_actor_type;//gen_test_receptionist_type();
+    MPI_Datatype test_receptionist_type = gen_test_receptionist_type();
 
     int num_actor_types = 1;
     MPI_Datatype actor_type_list[] = { test_actor_type };
@@ -118,7 +118,7 @@ void comm_actor_duplication(void) {
     MPI_Comm comm_actor_dup_dup = MPI_COMM_NULL;
 
     MPI_Datatype test_actor_type = gen_test_actor_type();
-    MPI_Datatype test_receptionist_type = test_actor_type;//gen_test_receptionist_type();
+    MPI_Datatype test_receptionist_type = gen_test_receptionist_type();
 
     int num_actor_types = 1;
     MPI_Datatype actor_type_list[] = { test_actor_type };
