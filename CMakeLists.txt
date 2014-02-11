@@ -18,7 +18,6 @@ add_custom_target( check
 )
 
 
-include_directories(${CMAKE_SOURCE_DIRECTORY}/src)
 
 
 add_subdirectory (src)
