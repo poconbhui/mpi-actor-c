@@ -274,12 +274,74 @@ void comm_actor_duplication(void) {
 }
 
 
+void comm_actor_null_arguments(void) {
+    MPI_Comm comm_actor = MPI_COMM_NULL;
+
+    int num_actor_types = 0;
+    int *actor_types = NULL;
+
+    MPI_Datatype test_receptionist_type = gen_test_receptionist_type();
+
+    int err;
+
+
+    err = MPI_Actor_create(
+        MPI_COMM_WORLD,
+        num_actor_types, NULL, test_receptionist_type,
+        &comm_actor
+    );
+
+
+    /* Check return values */
+    require_true(
+        "MPI_Actor create return value should be MPI_SUCCESS", MPI_COMM_WORLD,
+        err == MPI_SUCCESS
+    );
+
+    require_true(
+        "comm_actor should not be MPI_COMM_NULL", MPI_COMM_WORLD,
+        comm_actor != MPI_COMM_NULL
+    );
+
+
+    /* Check retrieving information from the actor communicator */
+    MPI_Datatype *test_actor_type_list = NULL;
+    MPI_Datatype test_test_receptionist_type = MPI_DATATYPE_NULL;
+    err = MPI_Actor_get(
+        comm_actor, num_actor_types, test_actor_type_list,
+        &test_test_receptionist_type
+    );
+
+    require_true(
+        "MPI_Actor_get return value should be MPI_SUCCESS", MPI_COMM_WORLD,
+        err == MPI_SUCCESS
+    );
+
+    require_true(
+        "test_actor_type_list should be the NULL pointer",
+        MPI_COMM_WORLD,
+        test_actor_type_list == NULL
+    );
+
+    require_true(
+        "test_test_receptionist_type be the test_receptionist",
+        MPI_COMM_WORLD,
+        test_test_receptionist_type == test_receptionist_type
+    );
+
+}
+
+
 int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
 
     start_suite("MPI_Actor_create");
     run_test(comm_actor_creation, "Creation, getting, deleting");
     run_test(comm_actor_duplication, "Communicator duplication");
+    run_test(
+        comm_actor_null_arguments,
+        "Communicator creation with silly arguments"
+    );
     end_suite();
 
     MPI_Finalize();

@@ -6,6 +6,7 @@
 
 #include "type_create_actor.h"
 #include "actor_create.h"
+#include "actor_start.h"
 
 
 #endif  // MPI_ACTOR_H_
