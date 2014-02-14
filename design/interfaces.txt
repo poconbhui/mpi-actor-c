@@ -92,6 +92,7 @@
   - When receptionist dies, everything held in suspended state.
   - Arguments:
     - Actor communicator
+    - Root process (process holding the receptionist)
     - Buffer with receptionist state information
   - Returns:
     - Buffer with final receptionist state information
