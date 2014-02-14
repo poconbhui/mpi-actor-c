@@ -10,29 +10,29 @@
 
 
 /* Keyval for actor data stored on a communicator. */
-static int actor_comm_struct_key = MPI_KEYVAL_INVALID;
+static int Actor_comm_data_key = MPI_KEYVAL_INVALID;
 
 typedef struct {
     int num_actor_types;
     MPI_Datatype *actor_types;
 
     MPI_Datatype receptionist_type;
-} actor_comm_struct;
+} Actor_comm_data;
 
 
-static void alloc_actor_comm_struct(
-    int, MPI_Datatype*, MPI_Datatype, actor_comm_struct**
+static void alloc_Actor_comm_data(
+    int, MPI_Datatype*, MPI_Datatype, Actor_comm_data**
 );
 
 
-/* Allocate and copy the an actor_comm_struct */
-static int copy_actor_comm_struct(
+/* Allocate and copy the an Actor_comm_data */
+static int copy_Actor_comm_data(
     MPI_Comm, int, void*, void*, void*, int*
 );
 
 
-/* Free an actor_comm_struct */
-static int free_actor_comm_struct(MPI_Comm, int, void*, void*);
+/* Free an Actor_comm_data */
+static int free_Actor_comm_data(MPI_Comm, int, void*, void*);
 
 
 /* Initialise keyvals if not already initialised. Otherwise do nothing. */
@@ -50,7 +50,7 @@ int MPI_Actor_create(
     MPI_Datatype *actor_types, MPI_Datatype receptionist_type,
     MPI_Comm *comm_actor
 ) {
-    actor_comm_struct *acs_ptr = NULL;
+    Actor_comm_data *actor_comm_data_ptr = NULL;
 
     int flag;
 
@@ -63,15 +63,18 @@ int MPI_Actor_create(
     MPI_Comm_dup(comm_old, comm_actor);
 
     
-    /* Generate new actor_comm_struct to be attached to the communicator */
-    alloc_actor_comm_struct(
+    /* Generate new Actor_comm_data to be attached to the communicator */
+    alloc_Actor_comm_data(
         nactor_types, actor_types, receptionist_type,
-        &acs_ptr
+        &actor_comm_data_ptr
     );
 
 
     /* Attach datatypes to the communicator */
-    MPI_Comm_set_attr(*comm_actor, actor_comm_struct_key, acs_ptr);
+    MPI_Comm_set_attr(
+        *comm_actor, Actor_comm_data_key,
+        actor_comm_data_ptr
+    );
 
 
     return MPI_SUCCESS;
@@ -83,29 +86,29 @@ int MPI_Actor_get(
     MPI_Comm comm_actor, int max_num_actor_types,
     MPI_Datatype *actor_types, MPI_Datatype *receptionist_type
 ) {
-    actor_comm_struct *acs = NULL;
+    Actor_comm_data *actor_comm_data = NULL;
     int flag;
     int i;
 
 
 
     MPI_Comm_get_attr(
-        comm_actor, actor_comm_struct_key,
-        &acs, &flag
+        comm_actor, Actor_comm_data_key,
+        &actor_comm_data, &flag
     );
 
 
-    if((*acs).num_actor_types < max_num_actor_types) {
-        max_num_actor_types = (*acs).num_actor_types;
+    if((*actor_comm_data).num_actor_types < max_num_actor_types) {
+        max_num_actor_types = (*actor_comm_data).num_actor_types;
     }
     //return MPI_ERR_UNKNOWN;
 
     for(i=0; i<max_num_actor_types; i++) {
-        actor_types[i] = (*acs).actor_types[i];
+        actor_types[i] = (*actor_comm_data).actor_types[i];
     }
 
 
-    *receptionist_type = (*acs).receptionist_type;
+    *receptionist_type = (*actor_comm_data).receptionist_type;
 
 
     return MPI_SUCCESS;
@@ -113,26 +116,26 @@ int MPI_Actor_get(
 
 /****************************************************************************/
 
-static void alloc_actor_comm_struct(
+static void alloc_Actor_comm_data(
     int num_actor_types, MPI_Datatype *actor_types,
     MPI_Datatype receptionist_type,
-    actor_comm_struct** acs
+    Actor_comm_data** actor_comm_data
 ) {
-    *acs = malloc(sizeof(actor_comm_struct));
+    *actor_comm_data = malloc(sizeof(Actor_comm_data));
 
-    (**acs).num_actor_types = num_actor_types;
+    (**actor_comm_data).num_actor_types = num_actor_types;
 
     size_t actor_types_size = sizeof(MPI_Datatype)*num_actor_types;
-    (**acs).actor_types = malloc(actor_types_size);
-    memcpy((**acs).actor_types, actor_types, actor_types_size);
+    (**actor_comm_data).actor_types = malloc(actor_types_size);
+    memcpy((**actor_comm_data).actor_types, actor_types, actor_types_size);
 
-    (**acs).receptionist_type = receptionist_type;
+    (**actor_comm_data).receptionist_type = receptionist_type;
     
 }
 
 /****************************************************************************/
 
-static int copy_actor_comm_struct(
+static int copy_Actor_comm_data(
     MPI_Comm comm_actor,
     int comm_actor_types_key,
     void *extra_state,
@@ -140,14 +143,15 @@ static int copy_actor_comm_struct(
     void *attribute_val_out,
     int *flag
 ) {
-    actor_comm_struct  *acs_in  = attribute_val_in;
-    actor_comm_struct **acs_out = attribute_val_out;
+    Actor_comm_data  *actor_comm_data_in  = attribute_val_in;
+    Actor_comm_data **actor_comm_data_out = attribute_val_out;
 
 
-    alloc_actor_comm_struct(
-        (*acs_in).num_actor_types, (*acs_in).actor_types,
-        (*acs_in).receptionist_type,
-        acs_out
+    alloc_Actor_comm_data(
+        (*actor_comm_data_in).num_actor_types,
+        (*actor_comm_data_in).actor_types,
+        (*actor_comm_data_in).receptionist_type,
+        actor_comm_data_out
     );
 
 
@@ -159,16 +163,16 @@ static int copy_actor_comm_struct(
 
 /****************************************************************************/
 
-static int free_actor_comm_struct(
+static int free_Actor_comm_data(
     MPI_Comm comm_actor,
     int comm_key,
     void *attribute_val,
     void *extra_state
 ){
-    actor_comm_struct *acs = attribute_val;
+    Actor_comm_data *actor_comm_data = attribute_val;
 
-    free((*acs).actor_types);
-    free(acs);
+    free((*actor_comm_data).actor_types);
+    free(actor_comm_data);
 
     return MPI_SUCCESS;
 }
@@ -178,11 +182,11 @@ static int free_actor_comm_struct(
 static void initialise_keys(void) {
     /* TODO: Add mutex locks to allow for thread safety */
 
-    if(actor_comm_struct_key == MPI_KEYVAL_INVALID) {
+    if(Actor_comm_data_key == MPI_KEYVAL_INVALID) {
         MPI_Comm_create_keyval(
-            copy_actor_comm_struct,
-            free_actor_comm_struct,
-            &actor_comm_struct_key,
+            copy_Actor_comm_data,
+            free_Actor_comm_data,
+            &Actor_comm_data_key,
             NULL
         );
     }
