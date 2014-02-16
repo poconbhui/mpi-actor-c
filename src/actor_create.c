@@ -82,6 +82,24 @@ int MPI_Actor_create(
 
 /****************************************************************************/
 
+int MPI_Actor_get_num(MPI_Comm comm_actor, int *num_actor_types) {
+    Actor_comm_data *actor_comm_data = NULL;
+    int flag;
+
+
+    MPI_Comm_get_attr(
+        comm_actor, Actor_comm_data_key,
+        &actor_comm_data, &flag
+    );
+
+
+    *num_actor_types = (*actor_comm_data).num_actor_types;
+
+    return MPI_SUCCESS;
+}
+
+/****************************************************************************/
+
 int MPI_Actor_get(
     MPI_Comm comm_actor, int max_num_actor_types,
     MPI_Datatype *actor_types, MPI_Datatype *receptionist_type
@@ -89,7 +107,6 @@ int MPI_Actor_get(
     Actor_comm_data *actor_comm_data = NULL;
     int flag;
     int i;
-
 
 
     MPI_Comm_get_attr(

@@ -16,6 +16,11 @@ int MPI_Actor_create(
 );
 
 
+/* Get the number of actor types, not including the receptionist, */
+/* registered to the actor communicator.                          */
+int MPI_Actor_get_num(MPI_Comm comm_actor, int *num_actor_types);
+
+
 /* Retrieve information about an Actor communicator. */
 
 /* This returns a list of the actor types registered to an */
