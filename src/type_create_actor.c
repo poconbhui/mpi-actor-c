@@ -119,7 +119,7 @@ int MPI_Actor_get_data(
     );
 
     if(flag != 1 || err != MPI_SUCCESS) {
-        return flag;
+        return MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_TYPE);
     }
 
 
