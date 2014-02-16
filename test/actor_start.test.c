@@ -66,7 +66,7 @@ void actor_start_receptionist(void) {
 
 
     MPI_Actor_start(
-        MPI_COMM_WORLD, root_rank, receptionist_state
+        comm_actor, root_rank, receptionist_state
     );
     require_true(
         "MPI_Actor_start should set receptionist_setat to 2 after input of 0",
@@ -77,7 +77,7 @@ void actor_start_receptionist(void) {
 
     receptionist_state[0] = 2;
     MPI_Actor_start(
-        MPI_COMM_WORLD, root_rank, receptionist_state
+        comm_actor, root_rank, receptionist_state
     );
 
     require_true(
