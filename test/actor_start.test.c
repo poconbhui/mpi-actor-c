@@ -5,8 +5,7 @@
 
 
 int test_receptionist_main(
-    MPI_Comm comm_actor, MPI_Datatype actor_type,
-    void* message, int tag,
+    MPI_Comm comm_actor, MPI_Datatype actor_type, int tag,
     void* void_state
 ) {
     int *state = void_state;
