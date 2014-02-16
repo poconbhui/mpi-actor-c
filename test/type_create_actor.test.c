@@ -10,8 +10,7 @@
  * Define a simple actor type here
  */
 int test_main_fn(
-    MPI_Comm comm_actor, MPI_Datatype actor_type,
-    void* message, int tag,
+    MPI_Comm comm_actor, MPI_Datatype actor_type, int tag,
     void* state
 ) {
     return MPI_ACTOR_ALIVE;
