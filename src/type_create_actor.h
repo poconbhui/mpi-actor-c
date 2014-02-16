@@ -53,5 +53,11 @@ int MPI_Actor_get_data(
     void *initial_data
 );
 
+/* Return main function of the Actor type */
+int MPI_Actor_get_main(
+    MPI_Datatype actor_type,
+    MPI_Actor_main_function **actor_main_function
+);
+
 
 #endif // MPI_ACTOR_TYPE_H_

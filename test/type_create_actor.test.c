@@ -30,6 +30,8 @@ void actor_type_creation(void) {
     MPI_Datatype test_data_type = MPI_DATATYPE_NULL;
     int *test_data = calloc(data_count, sizeof(int));
 
+    MPI_Actor_main_function *test_test_main_fn;
+
     int err;
 
 
@@ -92,6 +94,18 @@ void actor_type_creation(void) {
     );
 
 
+    /* Test MPI_Actor_get_main */
+    err = MPI_Actor_get_main(actor_type, &test_test_main_fn);
+    require_true(
+        "MPI_Actor_get_main should return MPI_SUCCESS", MPI_COMM_WORLD,
+        err == MPI_SUCCESS
+    );
+    require_true(
+        "MPI_Actor_get_main should return test_main_fn", MPI_COMM_WORLD,
+        test_test_main_fn == test_main_fn
+    );
+
+
     MPI_Type_free(&actor_type);
 }
 
@@ -108,6 +122,8 @@ void actor_type_duplication(void) {
     int test_data_count = 0;
     MPI_Datatype test_data_type = MPI_DATATYPE_NULL;
     int *test_data = calloc(10, sizeof(int));
+
+    MPI_Actor_main_function *test_test_main_fn;
 
     int err;
     int i;
@@ -157,8 +173,7 @@ void actor_type_duplication(void) {
         actor_type_dup, test_data_count, test_data_type, test_data
     );
     require_true(
-        "MPI_Actor_get_data should return MPI_SUCCESS"
-        " for actor_type_dup",
+        "MPI_Actor_get_data should return MPI_SUCCESS",
         MPI_COMM_WORLD,
         err == MPI_SUCCESS
     );
@@ -177,6 +192,18 @@ void actor_type_duplication(void) {
         MPI_COMM_WORLD,
         test_data[9] == 9
     );
+
+    /* Test MPI_Actor_get_main */
+    err = MPI_Actor_get_main(actor_type_dup, &test_test_main_fn);
+    require_true(
+        "MPI_Actor_get_main should return MPI_SUCCESS", MPI_COMM_WORLD,
+        err == MPI_SUCCESS
+    );
+    require_true(
+        "MPI_Actor_get_main should return test_main_fn", MPI_COMM_WORLD,
+        test_test_main_fn == test_main_fn
+    );
+
 
     /* Free original actor_type */
     err = MPI_Type_free(&actor_type);
@@ -196,12 +223,14 @@ void actor_type_duplication(void) {
         actor_type_dup, &test_data_count, &test_data_type
     );
     require_true(
-        "MPI_Actor_get_datatypes should return MPI_SUCCESS on dup after free",
+        "MPI_Actor_get_datatypes should return MPI_SUCCESS"
+        " after free",
         MPI_COMM_WORLD,
         err == MPI_SUCCESS
     );
     require_true(
-        "MPI_Actor_data_count should return 10 on dup", MPI_COMM_WORLD,
+        "MPI_Actor_data_count should return 10"
+        " after free", MPI_COMM_WORLD,
         test_data_count == 10
     );
 
@@ -210,23 +239,40 @@ void actor_type_duplication(void) {
         actor_type_dup, test_data_count, test_data_type, test_data
     );
     require_true(
-        "MPI_Actor_get_data should return MPI_SUCCESS", MPI_COMM_WORLD,
+        "MPI_Actor_get_data should return MPI_SUCCESS"
+        " after free", MPI_COMM_WORLD,
         err == MPI_SUCCESS
     );
     require_true(
-        "MPI_Actor_get_data should set the 0th data element to 0",
+        "MPI_Actor_get_data should set the 0th data element to 0"
+        " after free",
         MPI_COMM_WORLD,
         test_data[0] == 0
     );
     require_true(
-        "MPI_Actor_get_data should set the 5th data element to 5",
+        "MPI_Actor_get_data should set the 5th data element to 5"
+        " after free",
         MPI_COMM_WORLD,
         test_data[5] == 5
     );
     require_true(
-        "MPI_Actor_get_data should set the 9th data element to 9",
+        "MPI_Actor_get_data should set the 9th data element to 9"
+        " after free",
         MPI_COMM_WORLD,
         test_data[9] == 9
+    );
+
+    /* Test MPI_Actor_get_main */
+    err = MPI_Actor_get_main(actor_type_dup, &test_test_main_fn);
+    require_true(
+        "MPI_Actor_get_main should return MPI_SUCCESS"
+        " after free", MPI_COMM_WORLD,
+        err == MPI_SUCCESS
+    );
+    require_true(
+        "MPI_Actor_get_main should return test_main_fn"
+        " after free", MPI_COMM_WORLD,
+        test_test_main_fn == test_main_fn
     );
 
 

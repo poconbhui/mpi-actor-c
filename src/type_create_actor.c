@@ -141,6 +141,32 @@ int MPI_Actor_get_data(
 
 /****************************************************************************/
 
+int MPI_Actor_get_main(
+    MPI_Datatype actor_type,
+    MPI_Actor_main_function **actor_main_function
+) {
+    Actor_type_data *actor_type_data = NULL;
+    int flag;
+    int err;
+
+
+    err = MPI_Type_get_attr(
+        actor_type, Actor_type_data_key, &actor_type_data, &flag
+    );
+
+    if(flag != 1 || err != MPI_SUCCESS) {
+        return MPI_Comm_call_errhandler(MPI_COMM_WORLD, MPI_ERR_TYPE);
+    }
+
+
+    *actor_main_function = (*actor_type_data).main;
+
+    
+    return MPI_SUCCESS;
+}
+
+/****************************************************************************/
+
 static void alloc_Actor_type_data(
     MPI_Actor_main_function *main,
     int count, MPI_Datatype type, void *initial_data,
