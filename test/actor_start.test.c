@@ -5,23 +5,22 @@
 
 
 int test_receptionist_main(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, int tag,
-    void* void_state
+    MPI_Actor_model_state actor_model_state, void* void_actor_state
 ) {
-    int *state = void_state;
+    int *actor_state = void_actor_state;
 
-    if(state[0] == 0) {
-        state[0] = 1;
+    if(actor_state[0] == 0) {
+        actor_state[0] = 1;
 
         return MPI_ACTOR_ALIVE;
     }
-    else if(state[0] == 1) {
-        state[0] = 2;
+    else if(actor_state[0] == 1) {
+        actor_state[0] = 2;
 
         return MPI_ACTOR_DEAD;
     }
     else {
-        state[0] = 3;
+        actor_state[0] = 3;
 
         return MPI_ACTOR_DEAD;
     }

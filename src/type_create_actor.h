@@ -20,7 +20,7 @@
 /* The MPI_Actor_main_function will be run any time a message      */
 /* arrives for an actor.                                           */
 typedef int MPI_Actor_main_function(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, int tag,
+    MPI_Actor_model_state actor_model_state,
     void* state
 );
 

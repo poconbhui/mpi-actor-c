@@ -5,10 +5,7 @@
 #include <stdlib.h>
 
 
-int test_main_fn(
-    MPI_Comm comm_actor, MPI_Datatype actor_type, int tag,
-    void* state
-) {
+int test_main_fn(MPI_Actor_model_state actor_model_state, void* actor_state) {
     return MPI_ACTOR_ALIVE;
 }
 
