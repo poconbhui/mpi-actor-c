@@ -10,18 +10,27 @@ int test_receptionist_main(
     int *actor_state = void_actor_state;
 
     if(actor_state[0] == 0) {
-        actor_state[0] = 1;
+        int msg = 0;
+        int tag = 0;
+        int self_id;
 
+        MPI_Actor_get_id(actor_model_state, &self_id);
+        MPI_Actor_send(&msg, 1, MPI_INT, self_id, tag, actor_model_state);
+
+        actor_state[0] = 1;
         return MPI_ACTOR_ALIVE;
     }
     else if(actor_state[0] == 1) {
-        actor_state[0] = 2;
+        int msg = -1;
+        int tag = 0;
 
+        MPI_Actor_recv(&msg, 1, MPI_INT, tag, actor_model_state);
+
+        actor_state[0] = 2;
         return MPI_ACTOR_DEAD;
     }
     else {
         actor_state[0] = 3;
-
         return MPI_ACTOR_DEAD;
     }
 }
