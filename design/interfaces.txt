@@ -16,9 +16,7 @@
 - MPI_Actor_main_function
   - Function pointer typedef
   - Arguments:
-    - Actor communicator
-    - Actor type
-    - Incoming message tag
+    - Actor comm
     - Stored state
 
 - MPI_Actor_get_datatypes
@@ -116,11 +114,12 @@
     - Data type
     - Actor ID
     - Tag
-    - Actor communicator
+    - Actor comm
 
 - MPI_Actor_hear
     - Actor specific data receiving routine
     - Arguments:
+      - Actor comm
       - buffer count
       - Data type
     - Returns:
@@ -135,3 +134,17 @@
     - Actor communicator
   - Return:
     - Actor ID
+
+- MPI_Actor_id
+  - Get current actor's id
+  - Arguments:
+    - Actor comm
+  - Returns:
+    - Current Actor ID
+
+- MPI_Actor_tag
+  - Get tag of next message for current actor
+  - Arguments:
+    - Actor comm
+  - Returns:
+    - Next message tag
