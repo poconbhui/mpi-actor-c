@@ -8,4 +8,4 @@
 #include "actor_create.h"
 
 
-#endif  // MPI_ACTOR_H_
+#endif  /* MPI_ACTOR_H_ */

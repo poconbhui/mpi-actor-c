@@ -118,7 +118,6 @@ int MPI_Actor_get(
     if((*actor_comm_data).num_actor_types < max_num_actor_types) {
         max_num_actor_types = (*actor_comm_data).num_actor_types;
     }
-    //return MPI_ERR_UNKNOWN;
 
     for(i=0; i<max_num_actor_types; i++) {
         actor_types[i] = (*actor_comm_data).actor_types[i];

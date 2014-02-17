@@ -55,4 +55,4 @@ int MPI_Actor_get_data(
 );
 
 
-#endif // MPI_ACTOR_TYPE_H_
+#endif /* MPI_ACTOR_TYPE_H_ */

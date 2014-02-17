@@ -15,4 +15,4 @@ int suite_exit_status(void);
 void require_true(char *message_if_fail, MPI_Comm comm, int test);
 
 
-#endif  // MPI_ACTOR_TEST_H_
+#endif  /* MPI_ACTOR_TEST_H_ */

@@ -31,4 +31,4 @@ int MPI_Actor_get(
 );
 
 
-#endif  // MPI_ACTOR_CREATE_H_
+#endif  /* MPI_ACTOR_CREATE_H_ */
