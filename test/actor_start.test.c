@@ -5,7 +5,7 @@
 
 
 int test_receptionist_main(
-    MPI_Actor_model_state actor_model_state, void* void_actor_state
+    MPI_Comm actor_comm, void* void_actor_state
 ) {
     int *actor_state = void_actor_state;
 
@@ -14,8 +14,8 @@ int test_receptionist_main(
         int tag = 0;
         int self_id;
 
-        MPI_Actor_get_id(actor_model_state, &self_id);
-        MPI_Actor_send(&msg, 1, MPI_INT, self_id, tag, actor_model_state);
+        MPI_Actor_get_id(actor_comm, &self_id);
+        MPI_Actor_send(&msg, 1, MPI_INT, self_id, tag, actor_comm);
 
         actor_state[0] = 1;
         return MPI_ACTOR_ALIVE;
@@ -24,7 +24,11 @@ int test_receptionist_main(
         int msg = -1;
         int tag = 0;
 
-        MPI_Actor_recv(&msg, 1, MPI_INT, tag, actor_model_state);
+        MPI_Actor_recv(
+            &msg, 1, MPI_INT,
+            MPI_ACTOR_ANY_ID, MPI_ACTOR_ANY_TAG,
+            actor_comm
+        );
 
         actor_state[0] = 2;
         return MPI_ACTOR_DEAD;
@@ -76,7 +80,7 @@ void actor_start_receptionist(void) {
         comm_actor, root_rank, receptionist_state
     );
     require_true(
-        "MPI_Actor_start should set receptionist_setat to 2 after input of 0",
+        "MPI_Actor_start should set receptionist_state to 2 after input of 0",
         MPI_COMM_WORLD,
         receptionist_state[0] == 2
     );

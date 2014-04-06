@@ -9,7 +9,7 @@
 /*
  * Define a simple actor type here
  */
-int test_main_fn(MPI_Actor_model_state actor_model_state, void* actor_state) {
+int test_main_fn(MPI_Comm comm_actor, void* actor_state) {
     return MPI_ACTOR_ALIVE;
 }
 

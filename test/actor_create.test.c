@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 
-int test_main_fn(MPI_Actor_model_state actor_model_state, void* actor_state) {
+int test_main_fn(MPI_Comm actor_comm, void* actor_state) {
     return MPI_ACTOR_ALIVE;
 }
 
