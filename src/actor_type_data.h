@@ -1,6 +1,8 @@
 #ifndef MPI_ACTOR_TYPE_DATA_H_
 #define MPI_ACTOR_TYPE_DATA_H_
 
+#include "actor.h"
+
 
 typedef struct {
     MPI_Actor_main_function *main;

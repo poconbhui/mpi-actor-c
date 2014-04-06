@@ -61,7 +61,7 @@ void comm_actor_creation(void) {
 
     /* Check return values */
     require_true(
-        "MPI_Actor create return value should be MPI_SUCCESS", MPI_COMM_WORLD,
+        "MPI_Actor_create return value should be MPI_SUCCESS", MPI_COMM_WORLD,
         err == MPI_SUCCESS
     );
 

@@ -31,12 +31,13 @@ static void initialise_keys(void);
 
 /****************************************************************************/
 
-void attach_Actor_comm_data(
+int attach_Actor_comm_data(
     int num_actor_types, MPI_Datatype* actor_types,
     MPI_Datatype receptionist_type,
     MPI_Comm comm_actor
 ) {
     Actor_comm_data *actor_comm_data_ptr = NULL;
+    int err = MPI_ERR_UNKNOWN;
 
 
     initialise_keys();
@@ -50,24 +51,30 @@ void attach_Actor_comm_data(
 
 
     /* Attach datatypes to the communicator */
-    MPI_Comm_set_attr(
+    err = MPI_Comm_set_attr(
         comm_actor, Actor_comm_data_key,
         actor_comm_data_ptr
     );
+
+    return err;
 }
 
 /****************************************************************************/
 
-void get_Actor_comm_data(
+int get_Actor_comm_data(
     MPI_Comm comm_actor, Actor_comm_data **actor_comm_data, int *flag
 ) {
+    int err = MPI_ERR_UNKNOWN;
+
 
     initialise_keys();
 
 
-    MPI_Comm_get_attr(
+    err = MPI_Comm_get_attr(
         comm_actor, Actor_comm_data_key, actor_comm_data, flag
     );
+
+    return err;
 }
 
 /****************************************************************************/
