@@ -47,7 +47,7 @@ static void set_Actor_instance_state(
 );
 
 static int run_Actor_instance(
-    Actor_instance actor_instance, MPI_Comm comm_actor, int tag
+    Actor_instance actor_instance, MPI_Comm comm_actor
 );
 
 
@@ -95,6 +95,24 @@ int MPI_Actor_start(MPI_Comm comm_actor, int root, void *receptionist_state) {
 
     return MPI_SUCCESS;
 }
+
+int MPI_Actor_send(
+    void *data, int count, MPI_Datatype datatype,
+    int actor_id, int tag,
+    MPI_Comm comm_actor
+) {}
+
+
+int MPI_Actor_recv(
+    void *data, int count, MPI_Datatype datatype,
+    int actor_id, int tag,
+    MPI_Comm comm_actor
+) {}
+
+
+int MPI_Actor_get_id(
+    MPI_Comm comm_actor, int *actor_id
+) { *actor_id = -1; }
 
 /*****************************************************************************/
 
@@ -183,9 +201,23 @@ static void set_Actor_instance_state(
 /*****************************************************************************/
 
 static int run_Actor_instance(
-    Actor_instance actor_instance, MPI_Comm comm_actor, int tag
+    Actor_instance actor_instance, MPI_Comm comm_actor
 ) {
-    MPI_Actor_main_function *main;
+    MPI_Actor_main_function *main = NULL;
+    void *state = NULL;
+
+
+    // Get main function and state
+    MPI_Actor_get_main(
+        actor_instance.actor_type,
+        &main
+    );
+
+    state = actor_instance.state;
+
+
+    // Run actor instance
+    main(comm_actor, state);
 }
 
 /*****************************************************************************/
