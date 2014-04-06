@@ -5,7 +5,8 @@
 
 
 /* Keyval for actor data stored on a communicator. */
-static int Actor_comm_data_key = MPI_KEYVAL_INVALID;
+/* NOT thread safe.                                */
+static int Actor_comm_data_key();
 
 
 /* Allocate and set a new Actor_comm_data */
@@ -24,11 +25,6 @@ static int copy_Actor_comm_data(
 static int free_Actor_comm_data(MPI_Comm, int, void*, void*);
 
 
-/* Initialise keyvals if not already initialised. Otherwise do nothing. */
-/* NOT thread safe.                                                     */
-static void initialise_keys(void);
-
-
 /****************************************************************************/
 
 int attach_Actor_comm_data(
@@ -40,9 +36,6 @@ int attach_Actor_comm_data(
     int err = MPI_ERR_UNKNOWN;
 
 
-    initialise_keys();
-
-
     /* Generate new Actor_comm_data to be attached to the communicator */
     alloc_Actor_comm_data(
         num_actor_types, actor_types, receptionist_type,
@@ -52,7 +45,7 @@ int attach_Actor_comm_data(
 
     /* Attach datatypes to the communicator */
     err = MPI_Comm_set_attr(
-        comm_actor, Actor_comm_data_key,
+        comm_actor, Actor_comm_data_key(),
         actor_comm_data_ptr
     );
 
@@ -67,11 +60,8 @@ int get_Actor_comm_data(
     int err = MPI_ERR_UNKNOWN;
 
 
-    initialise_keys();
-
-
     err = MPI_Comm_get_attr(
-        comm_actor, Actor_comm_data_key, actor_comm_data, flag
+        comm_actor, Actor_comm_data_key(), actor_comm_data, flag
     );
 
     return err;
@@ -142,15 +132,19 @@ static int free_Actor_comm_data(
 
 /****************************************************************************/
 
-static void initialise_keys(void) {
+static int Actor_comm_data_key(void) {
     /* TODO: Add mutex locks to allow for thread safety */
+    static int key = MPI_KEYVAL_INVALID;
 
-    if(Actor_comm_data_key == MPI_KEYVAL_INVALID) {
+    if(key == MPI_KEYVAL_INVALID) {
         MPI_Comm_create_keyval(
             copy_Actor_comm_data,
             free_Actor_comm_data,
-            &Actor_comm_data_key,
+            &key,
             NULL
         );
     }
+
+
+    return key;
 }

@@ -52,14 +52,12 @@ static int run_Actor_instance(
 
 
 
-static int Actor_start_data_key = MPI_KEYVAL_INVALID;
-
+static int Actor_start_data_key();
 typedef struct {
     MPI_Comm lib_comms;
     MPI_Comm actor_comms;
 } Actor_start_data;
 
-static void initialise_keys(void);
 
 /****************************************************************************/
 
@@ -68,9 +66,6 @@ int MPI_Actor_start(MPI_Comm comm_actor, int root, void *receptionist_state) {
     Actor_instance receptionist_instance = ACTOR_INSTANCE_NULL;
 
     int rank;
-
-
-    initialise_keys();
 
 
     /* Get the receptionist type */
@@ -222,7 +217,11 @@ static int run_Actor_instance(
 
 /*****************************************************************************/
 
-static void initialise_keys(void) {
-    if(Actor_start_data_key == MPI_KEYVAL_INVALID) {
+static int Actor_start_data_key(void) {
+    static int key = MPI_KEYVAL_INVALID;
+
+    if(key == MPI_KEYVAL_INVALID) {
     }
+
+    return key;
 }

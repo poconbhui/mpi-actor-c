@@ -6,7 +6,8 @@
 
 
 /* Keyval for Actor_type_data  */
-static int Actor_type_data_key = MPI_KEYVAL_INVALID;
+/* Not thread safe!            */
+static int Actor_type_data_key();
 
 /* Allocate a new instance of Actor_type_data on the heap */
 static void alloc_Actor_type_data(
@@ -21,10 +22,6 @@ static int copy_Actor_type_data(
 /* Free an instance of Actor_type_data from the heap */
 static int free_Actor_type_data(MPI_Datatype, int, void*, void*);
 
-/* Initialise they keys in this file if not already initiialised */
-/* Not thread safe!                                              */
-static void initialise_keys(void);
-
 
 /****************************************************************************/
 
@@ -38,9 +35,6 @@ int attach_Actor_type_data(
     int err;
 
 
-    initialise_keys();
-
-
     /* Initialise Actor_type_data and set to keyval */
     alloc_Actor_type_data(
         actor_main_function,
@@ -49,7 +43,7 @@ int attach_Actor_type_data(
     );
 
     err = MPI_Type_set_attr(
-        actor_type, Actor_type_data_key, actor_type_data_ptr
+        actor_type, Actor_type_data_key(), actor_type_data_ptr
     );
 
 
@@ -65,7 +59,7 @@ int get_Actor_type_data(
 
 
     err = MPI_Type_get_attr(
-        actor_type, Actor_type_data_key, actor_type_data, flag
+        actor_type, Actor_type_data_key(), actor_type_data, flag
     );
 
     return err;
@@ -136,16 +130,20 @@ static int free_Actor_type_data(
 
 /****************************************************************************/
 
-static void initialise_keys(void) {
+static int Actor_type_data_key(void) {
     /* TODO: Add mutex locks etc for thread safety.  */
     /* Same problem exists in MPICH2 implementation. */
+    static int key = MPI_KEYVAL_INVALID;
+
     
-    if(Actor_type_data_key == MPI_KEYVAL_INVALID) {
+    if(key == MPI_KEYVAL_INVALID) {
         MPI_Type_create_keyval(
             copy_Actor_type_data,
             free_Actor_type_data,
-            &Actor_type_data_key,
+            &key,
             NULL
         );
     }
+
+    return key;
 }
